@@ -22,7 +22,7 @@ namespace FrontUI
 
         public COMPort(string name)
         {
-            port = new SerialPort(name, 115200);
+            port = new SerialPort(name, 115200, Parity.None, 8, StopBits.One);
             port.Open();
         }
 

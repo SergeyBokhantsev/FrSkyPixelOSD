@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="ComHelper.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="FrSky\Crc.cs" />
     <Compile Include="FrSky\Info.cs" />
     <Compile Include="FrSky\Types\BitmapOpts.cs" />
     <Compile Include="FrSky\Types\CString.cs" />

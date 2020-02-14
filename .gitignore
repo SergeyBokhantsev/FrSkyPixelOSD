@@ -1,0 +1,9 @@
+/.vs/FrSkyPixelOSDTester/v15/*.suo
+/.vs/FrSkyPixelOSDTester/v15/Server/sqlite3/*.lock
+/.vs/FrSkyPixelOSDTester/v15/Server/sqlite3/*.ide
+/.vs/FrSkyPixelOSDTester/v15/Server/sqlite3/*.ide-shm
+/.vs/FrSkyPixelOSDTester/v15/Server/sqlite3/*.ide-wal
+/FrontUI/bin/Debug
+/FrontUI/obj/Debug/*.pdb
+/FrontUI/obj/Debug/*.cache
+/FrontUI/obj/Debug

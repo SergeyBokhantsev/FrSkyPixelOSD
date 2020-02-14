@@ -229,9 +229,9 @@ namespace FrontUI.FrSky
             CMD cmd = stroke && fill ? CMD.OSD_CMD_DRAWING_FILL_STROKE_TRIANGLE
                       : stroke ? CMD.OSD_CMD_DRAWING_STROKE_TRIANGLE
                       : fill ? CMD.OSD_CMD_DRAWING_FILL_TRIANGLE
-                      : default;
+                      : default(CMD);
 
-            if (cmd != default)
+            if (cmd != default(CMD))
             {
                 Send(cmd, new Point(x1, y1), new Point(x2, y2), new Point(x3, y3));
             }
@@ -242,9 +242,9 @@ namespace FrontUI.FrSky
             CMD cmd = stroke && fill ? CMD.OSD_CMD_DRAWING_FILL_STROKE_RECT
                       : stroke ? CMD.OSD_CMD_DRAWING_STROKE_RECT
                       : fill ? CMD.OSD_CMD_DRAWING_FILL_RECT
-                      : default;
+                      : default(CMD);
 
-            if (cmd != default)
+            if (cmd != default(CMD))
             {
                 Send(cmd, new Rect(x, y, w, h));
             }
@@ -274,15 +274,22 @@ namespace FrontUI.FrSky
         {
             lock (port)
             {
-                var frame = new List<byte>(Header.Length + 1 + Enumerable.Sum(parameters, p => p.Lenght) + 1);
-                frame.AddRange(Header);
+                var len = new Types.Uvariant(1 /*cmd*/ + Enumerable.Sum(parameters, p => p.Lenght) + 0 /*crc*/);
+
+                var frame = new List<byte>(64);
+                frame.AddRange(len.Serialize());
                 frame.Add((byte)command);
 
                 foreach (var p in parameters)
                     frame.AddRange(p.Serialize());
 
-                frame.Add(Crc(frame));
+                var crc = Crc.CreateCrc8DvbS2();
+                crc.Append(frame.ToArray());
 
+                frame.AddRange(crc.ToByteArray());
+
+                port.Write(Header, 0, Header.Length);
+                //port.Write(len.Serialize().ToArray(), 0, len.Serialize().Count());
                 port.Write(frame.ToArray(), 0, frame.Count);
                 port.Flush();
             }
@@ -347,7 +354,7 @@ namespace FrontUI.FrSky
 
             var payloadNoCrc = incomingPayload.Take(17).ToList();
 
-            if (Crc(payloadNoCrc) == incomingPayload[17])
+            if (Crc_(payloadNoCrc) == incomingPayload[17])
             {
                 Info.VersionMajor = incomingPayload[3];
                 Info.VersionMinor = incomingPayload[4];
@@ -371,7 +378,7 @@ namespace FrontUI.FrSky
             return (short)((v2 << 8) | v1);
         }
 
-        private byte Crc(List<byte> payload)
+        private byte Crc_(List<byte> payload)
         {
             byte crc = 0;
 

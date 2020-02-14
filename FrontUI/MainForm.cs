@@ -51,7 +51,10 @@ namespace FrontUI
 
         public void IncomingData(string str)
         {
-            tbIncoming.Text += str;
+            if (tbIncoming.InvokeRequired)
+                tbIncoming.Invoke(new Action(() => { tbIncoming.Text += str; }));
+            else
+                tbIncoming.Text += str;
         }
 
         private void bDraw_Click(object sender, EventArgs e)

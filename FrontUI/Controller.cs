@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FrontUI
@@ -13,13 +14,24 @@ namespace FrontUI
         private PixelOSD osd;
         private PortWrapper port;
         private readonly IFront front;
-
+        
         public Controller(IFront front)
         {
             this.front = front;
 
             front.PortSelected += port => CreateOsd(port);
             front.Draw += Front_Draw;
+
+            new Thread(Read).Start();
+        }
+
+        private void Read()
+        {
+            while(true)
+            {
+                osd?.Read();
+                Thread.Sleep(50);
+            }
         }
 
         private void CreateOsd(string portName)
@@ -49,7 +61,7 @@ namespace FrontUI
 
         private void Port_Readed(byte[] buffer, int offset, int count)
         {
-            var str = ToHexString(buffer, offset, count);
+            var str = ToHexString(buffer, offset, count, stats: false);
             front.IncomingData(str);
         }
 
@@ -63,6 +75,8 @@ namespace FrontUI
         {
             if (null != osd)
             {
+                osd.RequiestInfo();
+                return;
                 osd.TransactionBegin();
                 osd.MoveCursor(10, 10);
                 osd.DrawLine(10, 20);
@@ -73,7 +87,7 @@ namespace FrontUI
             }
         }
 
-        private string ToHexString(byte[] buffer, int offset, int count)
+        private string ToHexString(byte[] buffer, int offset, int count, bool stats = true)
         {
             if (count == 0)
                 return string.Empty;
@@ -86,8 +100,11 @@ namespace FrontUI
                 sb.Append(" ");
             }
 
-            double elapsedMs = (double)count * 12d / 115200d * 1000 + 1;
-            sb.Append($" ({count} b / {elapsedMs.ToString("0")} ms)");
+            if (stats)
+            {
+                double elapsedMs = (double)count * 12d / 115200d * 1000 + 1;
+                sb.Append($" ({count} b / {elapsedMs.ToString("0")} ms)");
+            }
 
             return sb.ToString();
         }
