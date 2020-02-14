@@ -16,7 +16,15 @@ namespace FrontUI
 
         public static IPort CreatePort(string portName)
         {
+            if (portName.Equals("fake", StringComparison.OrdinalIgnoreCase))
+                return new FakePort();
+
             return new COMPort(portName);
+        }
+
+        public static IPort CreateFakePort(string portName)
+        {
+            return new FakePort();
         }
     }
 }

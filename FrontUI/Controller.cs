@@ -22,14 +22,14 @@ namespace FrontUI
             front.PortSelected += port => CreateOsd(port);
             front.Draw += Front_Draw;
 
-            new Thread(Read).Start();
+            (new Thread(Read) { IsBackground = true, Priority = ThreadPriority.Lowest }).Start();
         }
 
         private void Read()
         {
             while(true)
             {
-                osd?.Read();
+                osd?.Tick();
                 Thread.Sleep(50);
             }
         }

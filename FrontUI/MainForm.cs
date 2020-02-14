@@ -35,6 +35,7 @@ namespace FrontUI
             using (new UiControlBusyScope(sender))
             {
                 cbPorts.Items.Clear();
+                cbPorts.Items.Add("Fake");
                 cbPorts.Items.AddRange(ComHelper.GetPortNames());
             }
         }
@@ -46,7 +47,10 @@ namespace FrontUI
 
         public void OutcomingData(string str)
         {
-            tbOutcoming.Text += str;
+            if (tbOutcoming.InvokeRequired)
+                tbOutcoming.Invoke(new Action(() => { tbOutcoming.Text += str; }));
+            else
+                tbOutcoming.Text += str;
         }
 
         public void IncomingData(string str)
